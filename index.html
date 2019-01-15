@@ -1,1 +1,127 @@
-Hello World
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Prediction Latency Comparison</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="index.css">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+
+<body>
+  <div class="left nav">
+    <div class="option">
+      <input class="hidden" type="button" name="menu"> Menu
+    </div>
+  </div>
+
+  <div class="right nav">
+    <div class="option">
+      <input class="hidden" type="button" name="analyze"> Analyze
+    </div>
+    <div class="option">
+      <input class="hidden" type="button" name="record"> Record
+    </div>
+  </div>
+
+  <div class="analyzing hidden">
+    <div class="middle nav">
+      <div class="option">
+        <input class="hidden" type="button" name="menu"> Start
+      </div>
+      <div class="option">
+        <input class="hidden" type="button" name="menu"> -Frame
+      </div>
+      <div class="option">
+        <input class="hidden" type="button" name="menu"> Play/Pause
+      </div>
+      <div class="option">
+        <input class="hidden" type="button" name="menu"> +Frame
+      </div>
+      <div class="option">
+        <input class="hidden" type="button" name="menu"> End
+      </div>
+    </div>
+  </div>
+
+  <div id="menu" class="invisible">
+
+    <div class="option">
+      <input class="hidden" type="button" name="close"> Close
+    </div>
+    <br>
+
+    <div class="setting">
+      Prediction Type:
+      <select name="predType">
+        <option value="default" default>Default</option>
+        <option value="none">None</option>
+      </select>
+    </div>
+    <br>
+
+    <div class="setting hidden">
+      Prediction Time: <input type="range" max="60" name="predTime" value="0">
+      <span id="predTimeSpan">0</span>ms
+    </div>
+    <br>
+
+    <div class="setting">
+      Stroke Type:
+      <select name="lineType">
+        <option value="dots" default>Dots</option>
+        <option value="line">Line</option>
+        <option value="dottedLine">Dotted Line</option>
+      </select>
+    </div>
+    <br>
+
+    <div class="painting">
+
+      <div class="setting">
+        Ink Color: <input type="color" name="inkColor" value="#000000">
+      </div>
+      <div class="setting">
+        Prediction Color: <input type="color" name="predColor" value="#000000">
+      </div>
+
+    </div>
+    <div class="analyzing hidden">
+
+      <div class="setting">
+        Trace Color: <input type="color" name="inkColorReplay" value="#AAAAAA">
+      </div>
+      <div class="setting">
+        Prediction Color: <input type="color" name="predColorReplay" value="#000000">
+      </div>
+      <div class="setting">
+        Future Events Color: <input type="color" name="futureColor" value="#AAAAAA">
+      </div>
+    </div>
+    <br>
+
+    <div class="painting">
+      <div class="setting">
+        Coalesced Painting: <div class="option selected" style="display:inline-block">
+          <input class="hidden" type="checkbox" name="coalesce" checked>
+        </div>
+      </div>
+    </div>
+    <br>
+
+  </div>
+
+  <div id="canvasView">
+    <canvas id="drawingCanvas"></canvas>
+  </div>
+
+  <script src="index.js"></script>
+  <script src="controls/canvasPainting.js"></script>
+  <script src="controls/eventListeners.js"></script>
+  <script src="controls/recordingAnalyzing.js"></script>
+
+</body>
+
+</html>
