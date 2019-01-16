@@ -7,15 +7,13 @@ let inking = false
 let coalescedEnabled = false
 let predictionType = false
 let inkColor = false
-let inkPredColor = false
+let predColor = false
+let futureColor = false
+let lineType = false
+
 
 // ANALYZING VARIABLES
 let analyzing = false
-let inkColorReplay = false
-let predColorReplay = false
-let futureColorReplay = false
-let predLine = false
-let predFitting = false
 let recordedFrames = []
 let recordedFrameIndex = 0
 let recordedFrameIndexMod = 1
@@ -31,16 +29,19 @@ let zoomHeight = 0
 function paint(timestamp) {
 
   if (analyzing) {
-    correctRatio(replay)
-    if (zoomEnabled) {
-      doZoom()
-    }
-    drawBackground(replay)
-    drawFrame(replay)
-    if (zoomEnabled) {
-      unzoom(replay, zoomX, zoomY, zoomWidth, zoomHeight)
-    }
-    revertRatio(replay)
+    document.querySelectorAll(".canvasView.analyzing canvas").forEach(function (canvas) {
+      replay = canvas.getContext('2d')
+      correctRatio(replay)
+      if (zoomEnabled) {
+        doZoom(replay)
+      }
+      drawBackground(replay)
+      drawFrame(replay)
+      if (zoomEnabled) {
+        unzoom(replay, zoomX, zoomY, zoomWidth, zoomHeight)
+      }
+      revertRatio(replay)
+    })
   } else {
     drawBackground(paintCtx)
     drawFrame(paintCtx)
@@ -48,20 +49,13 @@ function paint(timestamp) {
 
   if (window.RECORDING) {
     recordedFrames.push({
-      recentPointerEvents: JSON.parse(JSON.stringify(window.recentPointerEvents)),
-      predictedPointerEvents: JSON.parse(JSON.stringify(window.predictedPointerEvents)),
-      predictedControlPoints: JSON.parse(JSON.stringify(window.predictedControlPoints)),
-      type: window.type,
-      avgError: window.avgError,
-      maxError: window.maxError,
-      controlPoints: JSON.parse(JSON.stringify(window.controlPoints)),
-      slope: window.slope,// != undefined ? window.slope + 0 : undefined,
-      yOn0: window.yOn0,// != undefined ? window.yOn0 + 0 : undefined,
-      xSign: window.xSign,
-      ySign: window.ySign,
-      speed: window.speed,
       stroke: JSON.parse(JSON.stringify(stroke))
     })
+
+    // CLONE PATCH
+    if (stroke.length) {
+      recordedFrames.get(-1).stroke[0].prediction = stroke[0].prediction
+    }
   }
 
   requestAnimationFrame(paint)
@@ -77,6 +71,11 @@ window.addEventListener("load", function () {
   window.paintRatio = paintCanvas.width / paintCanvas.height
   window.offsetLeft = paintCanvas.offsetLeft
   window.offsetTop = paintCanvas.offsetTop
+
+  let analyzeCanvas = document.querySelector('.canvasView.analyzing canvas')
+
+  analyzeCanvas.width = paintCanvas.width
+  analyzeCanvas.height = paintCanvas.height
 
   requestAnimationFrame(paint)
 })

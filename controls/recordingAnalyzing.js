@@ -6,10 +6,6 @@ function trimRecording() {
       recordedFrames.shift()
     }
 
-    while (recordedFrames[0].recentPointerEvents.length == 0) {
-      recordedFrames.shift()
-    }
-
     // Remove the frames after the trace
     while (recordedFrames.length > 1 &&
       (recordedFrames[recordedFrames.length - 1].stroke[0].offsetX ==
@@ -89,10 +85,9 @@ function unzoom(context, x_min, y_min, width, height) {
 
 }
 
-function doZoom() {
+function doZoom(replay) {
   let x_min = Infinity, y_min = Infinity, width, height, x_max = 0, y_max = 0
-  getOffsetCoordinates(recordedFrames[Math.floor(recordedFrameIndex)].recentPointerEvents)
-  recordedFrames[Math.floor(recordedFrameIndex)].recentPointerEvents.forEach(point => {
+  recordedFrames[Math.floor(recordedFrameIndex)].stroke.forEach(point => {
     x_max = Math.max(x_max, point.offsetX)
     y_max = Math.max(y_max, point.offsetY)
     x_min = Math.min(x_min, point.offsetX)
@@ -109,56 +104,4 @@ function doZoom() {
   zoomWidth = x_max - zoomX + 50
   zoomHeight = y_max - zoomY + 50
   zoom(replay, zoomX, zoomY, zoomWidth, zoomHeight)
-}
-
-// Get a prediction using a Cubic Bezier representation of the recent events
-function getReparametizedCPs(pointerEvents, controlPoints, frames) {
-
-  // Get the total distance between the points
-  let totalDistance = 0
-  pointerEvents[0].distance = 0
-  for (let i = 1; i < pointerEvents.length; i++) {
-    let point = pointerEvents[i], past = pointerEvents[i - 1]
-    point.distance = getPointDistance(point, past)
-    totalDistance += point.distance
-  }
-
-  // Assign a t value to all the points relative to their distance from cp0
-  pointerEvents[0].t = 0
-  for (let i = 1; i < pointerEvents.length; i++) {
-    let point = pointerEvents[i], past = pointerEvents[i - 1]
-    point.t = past.t + point.distance / totalDistance
-  }
-
-  // Evaluate the average speed of the trace
-  let time = pointerEvents[pointerEvents.length - 1].time - pointerEvents[0].time
-  let speed = totalDistance / time
-
-  // Used the fitted model to predict the pointer by frame
-  let lastPredicted = pointerEvents[pointerEvents.length - 1]
-  let prediction = []
-  let targetDistance = window.MS_PER_FRAME * frames * speed
-  targetDistance = Math.min(totalDistance, targetDistance)
-  let acumDistance = 0
-  let tIncrement = 1 / pointerEvents.length
-  let avgDistance = totalDistance / pointerEvents.length
-
-
-
-  while (acumDistance + avgDistance <= targetDistance) {
-    stack_count = 0
-    let point = LookUpT(tIncrement, controlPoints, lastPredicted, avgDistance)
-    if (!point) break
-    point.time = point.distance / speed + lastPredicted.time
-
-    acumDistance += point.distance
-
-    prediction.push(point)
-    lastPredicted = point
-  }
-
-  return {
-    prediction: prediction,
-    reparamcps: bezierReparameterized(1, lastPredicted.t, controlPoints)
-  }
 }

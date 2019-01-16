@@ -3,8 +3,13 @@ function stopPropagation(e) {
   if (e.stopPropagation) { e.stopPropagation() }
 }
 
-function addPoint(offsetX, offsetY, prediction) {
-  stroke.unshift({ offsetX: offsetX, offsetY: offsetY, prediction: prediction })
+function addPoint(offsetX, offsetY, time, prediction) {
+  stroke.unshift({
+    offsetX: offsetX,
+    offsetY: offsetY,
+    time: time,
+    prediction: prediction
+  })
   if (stroke.length > max_stroke_length) {
     stroke.pop()
   }
@@ -13,15 +18,19 @@ function addPoint(offsetX, offsetY, prediction) {
 function switchView() {
   analyzing = !analyzing
   if (analyzing) {
-    recordView.classList.remove("hidden")
-    viewTools.classList.remove("hidden")
-    paintCanvas.classList.add("hidden")
-    inputTools.classList.add("hidden")
+    document.querySelectorAll(".painting").forEach(function (elem) {
+      elem.classList.add("hidden")
+    })
+    document.querySelectorAll(".analyzing").forEach(function (elem) {
+      elem.classList.remove("hidden")
+    })
   } else {
-    paintCanvas.classList.remove("hidden")
-    inputTools.classList.remove("hidden")
-    recordView.classList.add("hidden")
-    viewTools.classList.add("hidden")
+    document.querySelectorAll(".painting").forEach(function (elem) {
+      elem.classList.remove("hidden")
+    })
+    document.querySelectorAll(".analyzing").forEach(function (elem) {
+      elem.classList.add("hidden")
+    })
   }
 }
 
@@ -36,18 +45,6 @@ function inputHandler(input) {
     case "coalesce":
       coalescedEnabled = input.checked
       break
-    case "prediction":
-      predictionType = input.checked
-      break
-    case "color":
-      predColor = input.checked
-      break
-    case "line":
-      predLine = input.checked
-      break
-    case "fitting":
-      predFitting = input.checked
-      break
     case "zoom":
       zoomEnabled = input.checked
       break
@@ -59,16 +56,6 @@ function inputHandler(input) {
         recordedFrames = []
       }
       window.RECORDING = input.checked
-      break
-    case "future":
-      if (input.checked) {
-        window.PREDICTED_FRAMES = parseFloat(input.value)
-      } else {
-        window.PREDICTED_FRAMES = 0
-      }
-      break
-    case "playSpeed":
-      recordedFrameIndexMod = parseFloat(input.value)
       break
     case "analyze":
       if (window.RECORDING) {
@@ -110,7 +97,7 @@ window.addEventListener("load", function () {
   paintCanvas.addEventListener("pointerdown", (e) => {
     inking = true
     stroke = []
-    addPoint(e.offsetX, e.offsetY, [])
+    addPoint(e.offsetX, e.offsetY, e.timeStamp, [])
     stopPropagation(e)
   }, false)
   paintCanvas.addEventListener("pointerup", (e) => {
@@ -126,10 +113,10 @@ window.addEventListener("load", function () {
     if (inking) {
       if (coalescedEnabled && e.getCoalescedEvents) {
         e.getCoalescedEvents().forEach(e => {
-          addPoint(e.offsetX, e.offsetY)
+          addPoint(e.offsetX, e.offsetY, e.timeStamp)
         })
       } else {
-        addPoint(e.offsetX, e.offsetY)
+        addPoint(e.offsetX, e.offsetY, e.timeStamp)
       }
       stroke[0].prediction = e.getPredictedEvents()
     }
@@ -159,21 +146,36 @@ window.addEventListener("load", function () {
   })
   predictionType = predType.value
 
+  let lineTypeInput = document.querySelector("[name='lineType']")
+  lineTypeInput.addEventListener("input", function (e) {
+    lineType = e.target.value
+  })
+  lineType = lineTypeInput.value
+
   let inkColorInput = document.querySelector("[name='inkColor']")
   inkColorInput.addEventListener("input", function (e) {
     inkColor = e.target.value
   })
   inkColor = inkColorInput.value
 
-  let inkPredColorInput = document.querySelector("[name='predColor']")
-  inkPredColorInput.addEventListener("input", function (e) {
-    inkPredColor = e.target.value
+  let predColorInput = document.querySelector("[name='predColor']")
+  predColorInput.addEventListener("input", function (e) {
+    predColor = e.target.value
   })
-  inkPredColor = inkPredColorInput.value
+  predColor = predColorInput.value
+
+  let futureColorInput = document.querySelector("[name='futureColor']")
+  futureColorInput.addEventListener("input", function (e) {
+    futureColor = e.target.value
+  })
+  futureColor = futureColorInput.value
+
+  let replaySpeedInput = document.querySelector("[name='replaySpeed']")
+  replaySpeedInput.addEventListener("input", function (e) {
+    recordedFrameIndexMod = e.target.value / 100
+    document.getElementById('replaySpeedSpan').textContent = e.target.value
+  })
+  recordedFrameIndexMod = replaySpeedInput.value / 100
 
   coalescedEnabled = document.querySelector("[name='coalesce']").value
-
-  document.querySelector("[name='predTime']").addEventListener("input", function (e) {
-    document.getElementById('predTimeSpan').textContent = e.target.value
-  })
 })
