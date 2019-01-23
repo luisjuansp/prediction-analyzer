@@ -3,11 +3,11 @@ function stopPropagation(e) {
   if (e.stopPropagation) { e.stopPropagation() }
 }
 
-function addPoint(offsetX, offsetY, time, prediction) {
+function addPoint(offsetX, offsetY, timeStamp, prediction) {
   stroke.unshift({
     offsetX: offsetX,
     offsetY: offsetY,
-    time: time,
+    timeStamp: timeStamp,
     prediction: prediction
   })
   if (stroke.length > max_stroke_length) {
@@ -63,7 +63,9 @@ function inputHandler(input) {
       }
       recordedFrameIndex = 0
       trimRecording()
+      addFuturePoints()
       switchView()
+      displayError()
       break
     case "paint":
       switchView()
@@ -71,16 +73,20 @@ function inputHandler(input) {
       break
     case "firstFrame":
       recordedFrameIndex = 0
+      displayError()
       break
     case "backFrame":
       recordedFrameIndex = Math.max(recordedFrameIndex - 1, 0)
+      displayError()
       break
     case "frontFrame":
       recordedFrameIndex =
         Math.min(recordedFrameIndex + 1, recordedFrames.length - 1)
+      displayError()
       break
     case "endFrame":
       recordedFrameIndex = recordedFrames.length - 1
+      displayError()
       break
   }
 
@@ -118,7 +124,9 @@ window.addEventListener("load", function () {
       } else {
         addPoint(e.offsetX, e.offsetY, e.timeStamp)
       }
-      stroke[0].prediction = e.getPredictedEvents()
+      if (e.getPredictedEvents) {
+        stroke[0].prediction = e.getPredictedEvents()
+      }
     }
     stopPropagation(e)
   }, false)

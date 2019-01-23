@@ -19,24 +19,28 @@ function drawLine(context, x_from, y_from, x_to, y_to, color, width = 1) {
 // DRAWS THE GRID IN THE BACKGROUND
 function drawBackground(context) {
   width = paintCanvas.width * 2
+  x_start = -paintCanvas.width
+  x_middle = paintCanvas.width / 2
   height = paintCanvas.height * 2
+  y_start = -paintCanvas.height
+  y_middle = paintCanvas.height / 2
   // PAINT THE BACK WHITE
   context.fillStyle = 'white'
-  context.fillRect(-paintCanvas.width, -paintCanvas.height, width, height)
+  context.fillRect(x_start, y_start, width, height)
 
   // DO THE NORMAL GRID
   let interval = 50
-  for (let x = paintCanvas.width / 2; x < width; x += interval) {
-    drawLine(context, x, 0, x, height, "grey")
+  for (let x = x_middle; x < width; x += interval) {
+    drawLine(context, x, y_start, x, height, "grey")
   }
-  for (let x = paintCanvas.width / 2; x >= 0; x -= interval) {
-    drawLine(context, x, 0, x, height, "grey")
+  for (let x = x_middle; x >= x_start; x -= interval) {
+    drawLine(context, x, y_start, x, height, "grey")
   }
-  for (let y = paintCanvas.height / 2; y < height; y += interval) {
-    drawLine(context, 0, y, width, y, "grey")
+  for (let y = y_middle; y < height; y += interval) {
+    drawLine(context, x_start, y, width, y, "grey")
   }
-  for (let y = paintCanvas.height / 2; y >= 0; y -= interval) {
-    drawLine(context, 0, y, width, y, "grey")
+  for (let y = y_middle; y >= y_start; y -= interval) {
+    drawLine(context, x_start, y, width, y, "grey")
   }
 
   // DRAW THE X AXIS AND Y AXIS
@@ -90,57 +94,29 @@ function drawFrame(context) {
   //GET THE COMMON INFORMATION FOR PAINTING AND ANALYZING
   let trace = stroke
   let frameIndex = Math.floor(recordedFrameIndex)
-  let predEnabled = (predictionType != "none")
+  let predEnabled = (predictionType != "none") && (trace[0] && trace[0].prediction && trace[0].prediction.length)
 
   // CHANGE THE VARIABLES IF ANALYZING
   if (analyzing && recordedFrames.length) {
-    // ADVANCE TO THE NEXT CYCLICAL FRAME IF PLAYING IS ON
-    if (isPlaying) {
-      recordedFrameIndex += 1 * recordedFrameIndexMod
-    }
-    if (recordedFrameIndex >= recordedFrames.length) {
-      recordedFrameIndex = 0
-    }
-
     trace = recordedFrames[frameIndex].stroke
   }
 
   // PAINT THE TRACE IF THERE IS ANY
   if (trace.length) {
 
-    // PAINT THE CURRENT TRACE, GREY IT OUT WHEN ANALYZING TO GIVE OTHER FEATURES A BETTER VIEW
-    drawSequence(context, trace, 5, inkColor)
-
     // PAINT REAL POINTER EVENT IF ANALIZING
     // THIS SHOULD PROVIDE A REFERENCE FOR PREDICTION ERROR
     if (analyzing && predEnabled && recordedFrames.length) {
-      let predTime = trace[0].prediction.length ?
-        trace[0].prediction[trace[0].prediction.length - 1].time : 0
-      let lastTime = trace[0].time
-
-      let targetFrameEvents = recordedFrames[frameIndex].stroke
-      let indexMod = 1
-
-      while (predTime >= targetFrameEvents[targetFrameEvents.length - 1].time) {
-        if (frameIndex + indexMod >= recordedFrames.length) break
-        targetFrameEvents = recordedFrames[frameIndex + indexMod++].stroke
-      }
-      if (frameIndex + indexMod < recordedFrames.length) {
-        targetFrameEvents = recordedFrames[frameIndex + indexMod].stroke
-      }
-
-      let pastPoint
-      for (let index = 0; index < targetFrameEvents.length; index++) {
-        const event = targetFrameEvents[index];
-        if (event.time > predTime) break
-        if (event.time <= lastTime) continue
+      let pastPoint = trace[0]
+      for (let index = recordedFrames[frameIndex].futurePoints.length - 1; index >= 0; index--) {
+        const event = recordedFrames[frameIndex].futurePoints[index];
         if (lineType != "line") {
           drawDiamond(context, event.offsetX, event.offsetY, 5, futureColor)
         }
-        if (pastPoint && lineType != "dots") {
+        if (lineType != "dots") {
           drawLine(context, pastPoint.offsetX, pastPoint.offsetY, event.offsetX, event.offsetY, futureColor, 2.5)
+          pastPoint = event
         }
-        pastPoint = event
       }
 
       if (pastPoint && lineType != "dots") {
@@ -152,5 +128,8 @@ function drawFrame(context) {
     if (predEnabled) {
       drawSequence(context, trace[0].prediction, 5, predColor, trace[0])
     }
+
+    // PAINT THE CURRENT TRACE
+    drawSequence(context, trace, 5, inkColor)
   }
 }

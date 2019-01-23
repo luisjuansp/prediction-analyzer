@@ -57,10 +57,11 @@
 
   <div id="menu" class="invisible">
 
-    <div class="option">
-      <input class="hidden" type="button" name="close"> Close
+    <div class="right nav">
+      <div class="option">
+        <input class="hidden" type="button" name="close"> Close
+      </div>
     </div>
-    <br>
 
     <div class="setting">
       Prediction Type:
@@ -85,7 +86,7 @@
       Ink Color: <input type="color" name="inkColor" value="#000000">
     </div>
     <div class="setting">
-      Prediction Color: <input type="color" name="predColor" value="#000000">
+      Prediction Color: <input type="color" name="predColor" value="#EE0000">
     </div>
     <div class="analyzing hidden">
       <div class="setting">
@@ -116,6 +117,44 @@
   </div>
   <div class="canvasView analyzing hidden">
     <canvas></canvas>
+    <div class="stats">
+      <div class="hidden stat">
+        Total Position Error: <span id="totPosErrorSpan">1</span>
+      </div>
+      <div class="hidden stat">
+        Avg. Position Error: <span id="avgPosErrorSpan">1</span>
+      </div>
+      <div class="hidden stat">
+        Total Time Error: <span id="totTimeErrorSpan">1</span>
+      </div>
+      <div class="hidden stat">
+        Avg. Time Error: <span id="avgTimeErrorSpan">1</span>
+      </div>
+      <div class="hidden stat">
+        Total Line Error: <span id="totLineErrorSpan">1</span>
+      </div>
+      <div class="hidden stat">
+        Avg. Line Error: <span id="avgLineErrorSpan">1</span>
+      </div>
+      <div class="hidden stat">
+        Total Angle Error: <span id="totAngleErrorSpan">1</span>
+      </div>
+      <div class="hidden stat">
+        Avg. Angle Error: <span id="avgAngleErrorSpan">1</span>
+      </div>
+      <div class="stat">
+        <div id="avgPosErrorPlot"></div>
+      </div>
+      <div class="stat">
+        <div id="avgTimeErrorPlot"></div>
+      </div>
+      <div class="stat">
+        <div id="avgLineErrorPlot"></div>
+      </div>
+      <div class="stat">
+        <div id="avgAngleErrorPlot"></div>
+      </div>
+    </div>
   </div>
 
   <script src="index.js"></script>

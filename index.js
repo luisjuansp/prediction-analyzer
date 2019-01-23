@@ -30,17 +30,23 @@ function paint(timestamp) {
 
   if (analyzing) {
     document.querySelectorAll(".canvasView.analyzing canvas").forEach(function (canvas) {
-      replay = canvas.getContext('2d')
-      correctRatio(replay)
-      if (zoomEnabled) {
-        doZoom(replay)
+      let context = canvas.getContext('2d')
+      // let view = canvas.parentElement
+
+      tick()
+
+      correctRatio(context)
+      if (zoomEnabled && recordedFrames.length) {
+        doZoom(context)
       }
-      drawBackground(replay)
-      drawFrame(replay)
-      if (zoomEnabled) {
-        unzoom(replay, zoomX, zoomY, zoomWidth, zoomHeight)
+
+      drawBackground(context)
+      drawFrame(context)
+
+      if (zoomEnabled && recordedFrames.length) {
+        unzoom(context, zoomX, zoomY, zoomWidth, zoomHeight)
       }
-      revertRatio(replay)
+      revertRatio(context)
     })
   } else {
     drawBackground(paintCtx)
@@ -76,6 +82,13 @@ window.addEventListener("load", function () {
 
   analyzeCanvas.width = paintCanvas.width
   analyzeCanvas.height = paintCanvas.height
+
+  let layout = { width: 10, height: 10 }
+
+  Plotly.newPlot('avgPosErrorPlot', [[]], layout, { displayModeBar: false });
+  Plotly.newPlot('avgTimeErrorPlot', [[]], layout, { displayModeBar: false });
+  Plotly.newPlot('avgLineErrorPlot', [[]], layout, { displayModeBar: false });
+  Plotly.newPlot('avgAngleErrorPlot', [[]], layout, { displayModeBar: false });
 
   requestAnimationFrame(paint)
 })
