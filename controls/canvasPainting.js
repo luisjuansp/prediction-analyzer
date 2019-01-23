@@ -107,19 +107,19 @@ function drawFrame(context) {
     // PAINT REAL POINTER EVENT IF ANALIZING
     // THIS SHOULD PROVIDE A REFERENCE FOR PREDICTION ERROR
     if (analyzing && predEnabled && recordedFrames.length) {
-      let pastPoint = trace[0]
+      let pastPoint = null
       for (let index = recordedFrames[frameIndex].futurePoints.length - 1; index >= 0; index--) {
         const event = recordedFrames[frameIndex].futurePoints[index];
         if (lineType != "line") {
           drawDiamond(context, event.offsetX, event.offsetY, 5, futureColor)
         }
-        if (lineType != "dots") {
+        if (lineType != "dots" && pastPoint) {
           drawLine(context, pastPoint.offsetX, pastPoint.offsetY, event.offsetX, event.offsetY, futureColor, 2.5)
-          pastPoint = event
         }
+        pastPoint = event
       }
 
-      if (pastPoint && lineType != "dots") {
+      if (lineType != "dots" && pastPoint) {
         drawLine(context, pastPoint.offsetX, pastPoint.offsetY, trace[0].offsetX, trace[0].offsetY, futureColor, 2.5)
       }
 
