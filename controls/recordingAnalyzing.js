@@ -29,33 +29,36 @@ function trimRecording() {
 }
 
 function addFuturePoints() {
-  for (let i = 0; i < recordedFrames.length; i++) {
-    let frame = recordedFrames[i]
+  predictionTypeArray.forEach(function (type) {
+    for (let i = 0; i < recordedFrames.length; i++) {
+      let frame = recordedFrames[i]
+      frame[type] = {}
 
-    let trace = targetFrameEvents = frame.stroke
-    let predTime = trace[0].prediction.length ?
-      trace[0].prediction[trace[0].prediction.length - 1].timeStamp : 0
-    let lastTime = trace[0].timeStamp
+      let trace = targetFrameEvents = frame.stroke
+      let predTime = trace[0][type].prediction.length ?
+        trace[0][type].prediction[trace[0][type].prediction.length - 1].timeStamp : 0
+      let lastTime = trace[0].timeStamp
 
-    let iMod = 1
-    while (predTime >= targetFrameEvents[0].timeStamp) {
-      if (i + iMod >= recordedFrames.length) break
-      targetFrameEvents = recordedFrames[i + iMod++].stroke
-    }
-    if (i + iMod < recordedFrames.length) {
-      targetFrameEvents = recordedFrames[i + iMod].stroke
-    }
+      let iMod = 1
+      while (predTime >= targetFrameEvents[0].timeStamp) {
+        if (i + iMod >= recordedFrames.length) break
+        targetFrameEvents = recordedFrames[i + iMod++].stroke
+      }
+      if (i + iMod < recordedFrames.length) {
+        targetFrameEvents = recordedFrames[i + iMod].stroke
+      }
 
-    let futurePoints = []
-    for (let j = targetFrameEvents.length - 1; j >= 0; j--) {
-      const event = targetFrameEvents[j];
-      if (event.timeStamp > predTime && futurePoints.length >= trace[0].prediction.length) break
-      if (event.timeStamp <= lastTime) continue
-      futurePoints.push(event)
+      let futurePoints = []
+      for (let j = targetFrameEvents.length - 1; j >= 0; j--) {
+        const event = targetFrameEvents[j];
+        if (event.timeStamp > predTime && futurePoints.length >= trace[0][type].prediction.length) break
+        if (event.timeStamp <= lastTime) continue
+        futurePoints.push(event)
+      }
+      frame[type].futurePoints = futurePoints
+      calcError(frame, type)
     }
-    frame.futurePoints = futurePoints
-    calcError(frame)
-  }
+  })
 }
 
 function tick() {
@@ -166,10 +169,10 @@ function calcPointDistance(a, b) {
   return Math.sqrt(Math.pow(a.offsetX - b.offsetX, 2) + Math.pow(a.offsetY - b.offsetY, 2))
 }
 
-function calcError(frame) {
-  let real = frame.futurePoints
+function calcError(frame, type) {
+  let real = frame[type].futurePoints
   let last = frame.stroke[0]
-  let prediction = last.prediction
+  let prediction = last[type].prediction
   let totPosError = 0
   let avgPosError = 0
   let totTimeError = 0
@@ -231,28 +234,20 @@ function calcError(frame) {
     avgAngleError = totAngleError / length
   }
 
-  frame.totPosError = totPosError
-  frame.avgPosError = avgPosError
-  frame.totTimeError = totTimeError
-  frame.avgTimeError = avgTimeError
-  frame.totLineError = totLineError
-  frame.avgLineError = avgLineError
-  frame.totAngleError = totAngleError
-  frame.avgAngleError = avgAngleError
+  frame[type].totPosError = totPosError
+  frame[type].avgPosError = avgPosError
+  frame[type].totTimeError = totTimeError
+  frame[type].avgTimeError = avgTimeError
+  frame[type].totLineError = totLineError
+  frame[type].avgLineError = avgLineError
+  frame[type].totAngleError = totAngleError
+  frame[type].avgAngleError = avgAngleError
 }
 
 function displayError() {
   let frameIndex = Math.floor(recordedFrameIndex)
   let frame = recordedFrames[frameIndex]
   if (!frame) return
-  document.querySelector('#totPosErrorSpan').textContent = frame.totPosError
-  document.querySelector('#avgPosErrorSpan').textContent = frame.avgPosError
-  document.querySelector('#totTimeErrorSpan').textContent = frame.totTimeError
-  document.querySelector('#avgTimeErrorSpan').textContent = frame.avgTimeError
-  document.querySelector('#totLineErrorSpan').textContent = frame.totLineError
-  document.querySelector('#avgLineErrorSpan').textContent = frame.avgLineError
-  document.querySelector('#totAngleErrorSpan').textContent = frame.totAngleError
-  document.querySelector('#avgAngleErrorSpan').textContent = frame.avgAngleError
 
   let avgPosErrorAxis = []
   let avgTimeErrorAxis = []
@@ -272,10 +267,10 @@ function displayError() {
       avgLineErrorAxis.push(0)
       avgAngleErrorAxis.push(0)
     } else {
-      avgPosErrorAxis.push(recordedFrames[index].avgPosError)
-      avgTimeErrorAxis.push(recordedFrames[index].avgTimeError)
-      avgLineErrorAxis.push(recordedFrames[index].avgLineError)
-      avgAngleErrorAxis.push(recordedFrames[index].avgAngleError)
+      avgPosErrorAxis.push(recordedFrames[index][predictionType].avgPosError)
+      avgTimeErrorAxis.push(recordedFrames[index][predictionType].avgTimeError)
+      avgLineErrorAxis.push(recordedFrames[index][predictionType].avgLineError)
+      avgAngleErrorAxis.push(recordedFrames[index][predictionType].avgAngleError)
     }
   })
 

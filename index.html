@@ -11,6 +11,7 @@
 </head>
 
 <body>
+  <input class="hidden" id="file" type="file" name="file">
   <div class="left nav">
     <div class="option">
       <input class="hidden" type="button" name="menu"> Menu
@@ -66,7 +67,7 @@
     <div class="setting">
       Prediction Type:
       <select name="predType">
-        <option value="default" default>Default</option>
+        <option value="defaultPred" default>Default</option>
         <option value="none">None</option>
       </select>
     </div>
@@ -110,6 +111,26 @@
     </div>
     <br>
 
+    <div class="analyzing hidden">
+      <div class="setting middle" style="display: flex;">
+        <div class="option">
+          <input class="hidden" type="button" name="save"> Save
+        </div>
+        <div id="loadOption" class="option">
+          <input class="hidden" type="button" name="load"> Load
+        </div>
+      </div>
+    </div>
+    <br>
+
+    <div class="analyzing hidden">
+      <div class="setting middle" style="display: flex;">
+        <div class="option">
+          <input class="hidden" type="button" name="comparison"> Pred. Comparison
+        </div>
+      </div>
+    </div>
+    <br>
   </div>
 
   <div class="canvasView painting">
@@ -118,30 +139,6 @@
   <div class="canvasView analyzing hidden">
     <canvas></canvas>
     <div class="stats">
-      <div class="hidden stat">
-        Total Position Error: <span id="totPosErrorSpan">1</span>
-      </div>
-      <div class="hidden stat">
-        Avg. Position Error: <span id="avgPosErrorSpan">1</span>
-      </div>
-      <div class="hidden stat">
-        Total Time Error: <span id="totTimeErrorSpan">1</span>
-      </div>
-      <div class="hidden stat">
-        Avg. Time Error: <span id="avgTimeErrorSpan">1</span>
-      </div>
-      <div class="hidden stat">
-        Total Line Error: <span id="totLineErrorSpan">1</span>
-      </div>
-      <div class="hidden stat">
-        Avg. Line Error: <span id="avgLineErrorSpan">1</span>
-      </div>
-      <div class="hidden stat">
-        Total Angle Error: <span id="totAngleErrorSpan">1</span>
-      </div>
-      <div class="hidden stat">
-        Avg. Angle Error: <span id="avgAngleErrorSpan">1</span>
-      </div>
       <div class="stat">
         <div id="avgPosErrorPlot"></div>
       </div>
@@ -154,6 +151,33 @@
       <div class="stat">
         <div id="avgAngleErrorPlot"></div>
       </div>
+    </div>
+  </div>
+
+  <div class="comparison hidden">
+    <div class="table">
+
+      <div class="cell"></div>
+      <div class="cell title timePredCol">Avg. Time Predicted</div>
+      <div class="cell title posCol">Avg. Position Error</div>
+      <div class="cell title timeCol">Avg. Time Error</div>
+      <div class="cell title lineCol">Avg. Line Error</div>
+      <div class="cell title angleCol">Avg. Angle Error</div>
+
+      <div class="cell predCol">Default</div>
+      <div class="cell timePredCol">123.12</div>
+      <div class="cell posCol">123.12</div>
+      <div class="cell timeCol">123.12</div>
+      <div class="cell lineCol">123.12</div>
+      <div class="cell angleCol">123.12</div>
+
+      <div class="cell predCol">None</div>
+      <div class="cell timePredCol">123.12</div>
+      <div class="cell posCol">123.12</div>
+      <div class="cell timeCol">123.12</div>
+      <div class="cell lineCol">123.12</div>
+      <div class="cell angleCol">123.12</div>
+
     </div>
   </div>
 

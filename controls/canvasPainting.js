@@ -93,23 +93,24 @@ function drawSequence(context, points, radius, color, pastPoint = points[0]) {
 function drawFrame(context) {
   //GET THE COMMON INFORMATION FOR PAINTING AND ANALYZING
   let trace = stroke
-  let frameIndex = Math.floor(recordedFrameIndex)
-  let predEnabled = (predictionType != "none") && (trace[0] && trace[0].prediction && trace[0].prediction.length)
 
   // CHANGE THE VARIABLES IF ANALYZING
+  let frameIndex = Math.floor(recordedFrameIndex)
   if (analyzing && recordedFrames.length) {
     trace = recordedFrames[frameIndex].stroke
   }
 
   // PAINT THE TRACE IF THERE IS ANY
   if (trace.length) {
+    let prediction = trace[0][predictionType] ? trace[0][predictionType].prediction : null
+    let predEnabled = (prediction && prediction.length)
 
     // PAINT REAL POINTER EVENT IF ANALIZING
     // THIS SHOULD PROVIDE A REFERENCE FOR PREDICTION ERROR
     if (analyzing && predEnabled && recordedFrames.length) {
       let pastPoint = null
-      for (let index = recordedFrames[frameIndex].futurePoints.length - 1; index >= 0; index--) {
-        const event = recordedFrames[frameIndex].futurePoints[index];
+      for (let index = recordedFrames[frameIndex][predictionType].futurePoints.length - 1; index >= 0; index--) {
+        const event = recordedFrames[frameIndex][predictionType].futurePoints[index];
         if (lineType != "line") {
           drawDiamond(context, event.offsetX, event.offsetY, 5, futureColor)
         }
@@ -126,7 +127,7 @@ function drawFrame(context) {
     }
     // PAINT THE PREDICTION IF IT IS ENABLED
     if (predEnabled) {
-      drawSequence(context, trace[0].prediction, 5, predColor, trace[0])
+      drawSequence(context, prediction, 5, predColor, trace[0])
     }
 
     // PAINT THE CURRENT TRACE

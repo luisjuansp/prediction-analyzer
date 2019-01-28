@@ -3,15 +3,31 @@ function stopPropagation(e) {
   if (e.stopPropagation) { e.stopPropagation() }
 }
 
-function addPoint(offsetX, offsetY, timeStamp, prediction) {
+function addPoint(offsetX, offsetY, timeStamp) {
   stroke.unshift({
     offsetX: offsetX,
     offsetY: offsetY,
-    timeStamp: timeStamp,
-    prediction: prediction
+    timeStamp: timeStamp
   })
   if (stroke.length > max_stroke_length) {
     stroke.pop()
+  }
+}
+
+function addPredictions(point, e) {
+  point.defaultPred = {}
+  point.none = { prediction: [] }
+
+  if (e.getPredictedEvents) {
+    point.defaultPred.prediction = e.getPredictedEvents().map(function (e) {
+      return {
+        offsetX: e.offsetX,
+        offsetY: e.offsetY,
+        timeStamp: e.timeStamp
+      }
+    })
+  } else {
+    point.defaultPred.prediction = []
   }
 }
 
@@ -32,6 +48,65 @@ function switchView() {
       elem.classList.add("hidden")
     })
   }
+}
+
+function makeDataFileUrl(object) {
+  var data = new Blob([JSON.stringify(object, null, 2)], { type: 'application/json' });
+
+  // If we are replacing a previously generated file we need to
+  // manually revoke the object URL to avoid memory leaks.
+  if (dataFileUrl !== null) {
+    window.URL.revokeObjectURL(dataFileUrl);
+  }
+
+  dataFileUrl = window.URL.createObjectURL(data);
+
+  return dataFileUrl;
+}
+
+function showTable() {
+  let comparison = document.querySelector('.comparison')
+  let table = document.querySelector('.table')
+  let predTypeSelect = document.querySelector('[name="predType"]')
+  comparison.classList.remove('hidden')
+  table.innerHTML = '<div class="cell"></div>' +
+    '<div class="cell title timePredCol">Avg. Time Predicted</div>' +
+    '<div class="cell title posCol">Avg. Position Error</div>' +
+    '<div class="cell title timeCol">Avg. Time Error</div>' +
+    '<div class="cell title lineCol">Avg. Line Error</div>' +
+    '<div class="cell title angleCol">Avg. Angle Error</div>'
+
+  for (var i = 0; i < predTypeSelect.options.length; i++) {
+    const option = predTypeSelect.options[i]
+    let predTime = posError = timeError = lineError = angleError = 0
+    for (let j = 0; j < recordedFrames.length; j++) {
+      const frame = recordedFrames[j];
+      if (frame.stroke[0][option.value].prediction.length) {
+        predTime += (
+          frame.stroke[0][option.value].prediction.get(-1).timeStamp -
+          frame.stroke[0].timeStamp
+        )
+      }
+      posError += frame[option.value].avgPosError
+      timeError += frame[option.value].avgTimeError
+      lineError += frame[option.value].avgLineError
+      angleError += frame[option.value].avgAngleError
+    }
+
+    predTime /= recordedFrames.length
+    posError /= recordedFrames.length
+    timeError /= recordedFrames.length
+    lineError /= recordedFrames.length
+    angleError /= recordedFrames.length
+
+    table.innerHTML += '<div class="cell predCol">' + option.textContent + '</div>' +
+      '<div class="cell timePredCol">' + predTime + '</div>' +
+      '<div class="cell posCol">' + posError + '</div>' +
+      '<div class="cell timeCol">' + timeError + '</div>' +
+      '<div class="cell lineCol">' + lineError + '</div>' +
+      '<div class="cell angleCol">' + angleError + '</div>'
+  }
+
 }
 
 function inputHandler(input) {
@@ -88,54 +163,70 @@ function inputHandler(input) {
       recordedFrameIndex = recordedFrames.length - 1
       displayError()
       break
+    case "save":
+      let element = document.createElement('a')
+      element.setAttribute('href', makeDataFileUrl(recordedFrames))
+      element.setAttribute('download', "data.json")
+      element.style.display = 'none'
+      document.body.appendChild(element)
+      element.click()
+      document.body.removeChild(element)
+      break
+    case "load":
+      document.querySelector("#file").click()
+      break
+    case "comparison":
+      showTable()
+      break
   }
 
-  if (input.type == "button") {
+  if (input.type == "button" || input.type == "file") {
     input.parentNode.classList.add("selected")
     input.checked = false
-    setTimeout(() => {
+    setTimeout(function () {
       input.parentNode.classList.remove("selected")
     }, 100)
   }
 }
 
 window.addEventListener("load", function () {
-  paintCanvas.addEventListener("pointerdown", (e) => {
+  paintCanvas.addEventListener("pointerdown", function (e) {
     inking = true
     stroke = []
-    addPoint(e.offsetX, e.offsetY, e.timeStamp, [])
+    addPoint(e.offsetX, e.offsetY, e.timeStamp)
+    stroke[0].defaultPred = { prediction: [] }
+    stroke[0].none = { prediction: [] }
     stopPropagation(e)
   }, false)
-  paintCanvas.addEventListener("pointerup", (e) => {
+  paintCanvas.addEventListener("pointerup", function (e) {
     inking = false
     stopPropagation(e)
   }, false)
-  paintCanvas.addEventListener("pointerleave", (e) => {
+  paintCanvas.addEventListener("pointerleave", function (e) {
     inking = false
     stopPropagation(e)
   }, false)
 
-  paintCanvas.addEventListener("pointermove", (e) => {
+  paintCanvas.addEventListener("pointermove", function (e) {
     if (inking) {
       if (coalescedEnabled && e.getCoalescedEvents) {
-        e.getCoalescedEvents().forEach(e => {
+        e.getCoalescedEvents().forEach(function (e) {
           addPoint(e.offsetX, e.offsetY, e.timeStamp)
         })
       } else {
         addPoint(e.offsetX, e.offsetY, e.timeStamp)
       }
-      if (e.getPredictedEvents) {
-        stroke[0].prediction = e.getPredictedEvents()
-      }
+
+      addPredictions(stroke[0], e)
     }
     stopPropagation(e)
   }, false)
 
-  document.querySelectorAll(".option").forEach(option => {
-    option.addEventListener("click", (e) => {
+  document.querySelectorAll(".option").forEach(function (option) {
+    option.addEventListener("click", function (e) {
       let input = e.target.querySelector("input")
       if (input) {
-        document.querySelectorAll("[name=" + input.name + "]").forEach(elem => {
+        document.querySelectorAll("[name=" + input.name + "]").forEach(function (elem) {
           elem.parentNode.classList.remove("selected")
         })
         input.checked = !input.checked
@@ -151,6 +242,9 @@ window.addEventListener("load", function () {
   let predType = document.querySelector("[name='predType']")
   predType.addEventListener("input", function (e) {
     predictionType = e.target.value
+    if (analyzing) {
+      displayError()
+    }
   })
   predictionType = predType.value
 
@@ -186,4 +280,26 @@ window.addEventListener("load", function () {
   recordedFrameIndexMod = replaySpeedInput.value / 100
 
   coalescedEnabled = document.querySelector("[name='coalesce']").value
+
+  reader.onload = function (e) {
+    console.log(reader.result)
+    recordedFrames = JSON.parse(reader.result)
+    recordedFrameIndex = 0
+    displayError()
+  };
+
+  document.querySelector("#file").addEventListener('input', function (e) {
+    if (e.target.files && e.target.files.length) {
+      reader.readAsText(e.target.files[0])
+    }
+  })
+
+  document.querySelector('.comparison').addEventListener('click', function (e) {
+    e.target.classList.add('hidden')
+    stopPropagation(e)
+  })
+
+  document.querySelector('.table').addEventListener('click', function (e) {
+    stopPropagation(e)
+  })
 })

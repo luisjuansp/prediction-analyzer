@@ -6,11 +6,11 @@ let max_stroke_length = 30
 let inking = false
 let coalescedEnabled = false
 let predictionType = false
+let predictionTypeArray = []
 let inkColor = false
 let predColor = false
 let futureColor = false
 let lineType = false
-
 
 // ANALYZING VARIABLES
 let analyzing = false
@@ -18,6 +18,8 @@ let recordedFrames = []
 let recordedFrameIndex = 0
 let recordedFrameIndexMod = 1
 let isPlaying = false
+let dataFileUrl = null
+let reader = new FileReader()
 
 // ZOOMING VARIABLES
 let zoomEnabled = false
@@ -57,11 +59,6 @@ function paint(timestamp) {
     recordedFrames.push({
       stroke: JSON.parse(JSON.stringify(stroke))
     })
-
-    // CLONE PATCH
-    if (stroke.length) {
-      recordedFrames.get(-1).stroke[0].prediction = stroke[0].prediction
-    }
   }
 
   requestAnimationFrame(paint)
@@ -83,6 +80,9 @@ window.addEventListener("load", function () {
   analyzeCanvas.width = paintCanvas.width
   analyzeCanvas.height = paintCanvas.height
 
+  for (var i = 0; i < document.querySelector('select[name="predType"]').options.length; i++) {
+    predictionTypeArray.push(document.querySelector('select[name="predType"]').options[i].value)
+  }
   let layout = { width: 10, height: 10 }
 
   Plotly.newPlot('avgPosErrorPlot', [[]], layout, { displayModeBar: false });
