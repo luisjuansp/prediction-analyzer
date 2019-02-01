@@ -35,6 +35,13 @@ function addFuturePoints() {
       frame[type] = {}
 
       let trace = targetFrameEvents = frame.stroke
+
+      if (!trace[0][type]) {
+        trace[0][type] = {}
+        let result = getPrediction(type, trace[0].recentPointerEvents)
+        trace[0][type].prediction = result.prediction
+      }
+
       let predTime = trace[0][type].prediction.length ?
         trace[0][type].prediction[trace[0][type].prediction.length - 1].timeStamp : 0
       let lastTime = trace[0].timeStamp
@@ -152,7 +159,7 @@ function doZoom(context) {
     x_min = Math.min(x_min, point.offsetX)
     y_min = Math.min(y_min, point.offsetY)
   })
-  recordedFrames[Math.floor(recordedFrameIndex)].stroke[0].prediction.forEach(point => {
+  recordedFrames[Math.floor(recordedFrameIndex)].stroke[0][predictionType].prediction.forEach(point => {
     x_max = Math.max(x_max, point.offsetX)
     y_max = Math.max(y_max, point.offsetY)
     x_min = Math.min(x_min, point.offsetX)

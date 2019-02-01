@@ -64,7 +64,7 @@
       </div>
     </div>
 
-    <div class="setting">
+    <div class="setting painting">
       Prediction Type:
       <select name="predType">
         <option value="defaultPred" default>Default</option>
@@ -136,48 +136,36 @@
   <div class="canvasView painting">
     <canvas id="drawingCanvas"></canvas>
   </div>
-  <div class="canvasView analyzing hidden">
-    <canvas></canvas>
-    <div class="stats">
-      <div class="stat">
-        <div id="avgPosErrorPlot"></div>
-      </div>
-      <div class="stat">
-        <div id="avgTimeErrorPlot"></div>
-      </div>
-      <div class="stat">
-        <div id="avgLineErrorPlot"></div>
-      </div>
-      <div class="stat">
-        <div id="avgAngleErrorPlot"></div>
+  <div class="analyzeView analyzing hidden">
+    <div class="canvasView">
+      <canvas></canvas>
+      <div class="stats">
+        <div class="stat pred">
+          Prediction Type:
+          <select name="predType">
+            <option value="defaultPred" default>Default</option>
+            <option value="none">None</option>
+          </select>
+        </div>
+        <div class="stat">
+          <div id="avgPosErrorPlot"></div>
+        </div>
+        <div class="stat">
+          <div id="avgTimeErrorPlot"></div>
+        </div>
+        <div class="stat">
+          <div id="avgLineErrorPlot"></div>
+        </div>
+        <div class="stat">
+          <div id="avgAngleErrorPlot"></div>
+        </div>
       </div>
     </div>
   </div>
 
+
   <div class="comparison hidden">
     <div class="table">
-
-      <div class="cell"></div>
-      <div class="cell title timePredCol">Avg. Time Predicted</div>
-      <div class="cell title posCol">Avg. Position Error</div>
-      <div class="cell title timeCol">Avg. Time Error</div>
-      <div class="cell title lineCol">Avg. Line Error</div>
-      <div class="cell title angleCol">Avg. Angle Error</div>
-
-      <div class="cell predCol">Default</div>
-      <div class="cell timePredCol">123.12</div>
-      <div class="cell posCol">123.12</div>
-      <div class="cell timeCol">123.12</div>
-      <div class="cell lineCol">123.12</div>
-      <div class="cell angleCol">123.12</div>
-
-      <div class="cell predCol">None</div>
-      <div class="cell timePredCol">123.12</div>
-      <div class="cell posCol">123.12</div>
-      <div class="cell timeCol">123.12</div>
-      <div class="cell lineCol">123.12</div>
-      <div class="cell angleCol">123.12</div>
-
     </div>
   </div>
 

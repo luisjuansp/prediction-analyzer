@@ -31,7 +31,7 @@ let zoomHeight = 0
 function paint(timestamp) {
 
   if (analyzing) {
-    document.querySelectorAll(".canvasView.analyzing canvas").forEach(function (canvas) {
+    document.querySelectorAll(".analyzing .canvasView canvas").forEach(function (canvas) {
       let context = canvas.getContext('2d')
       // let view = canvas.parentElement
 
@@ -75,7 +75,7 @@ window.addEventListener("load", function () {
   window.offsetLeft = paintCanvas.offsetLeft
   window.offsetTop = paintCanvas.offsetTop
 
-  let analyzeCanvas = document.querySelector('.canvasView.analyzing canvas')
+  let analyzeCanvas = document.querySelector('.analyzing .canvasView canvas')
 
   analyzeCanvas.width = paintCanvas.width
   analyzeCanvas.height = paintCanvas.height

@@ -14,9 +14,18 @@ function addPoint(offsetX, offsetY, timeStamp) {
   }
 }
 
+if (!window.getPrediction) {
+  window.getPrediction = () => { return { prediction: [] } }
+}
+
 function addPredictions(point, e) {
+  point[predictionType] = {}
   point.defaultPred = {}
   point.none = { prediction: [] }
+  point.recentPointerEvents = window.recentPointerEvents
+
+  let result = getPrediction(predictionType)
+  point[predictionType].prediction = result.prediction
 
   if (e.getPredictedEvents) {
     point.defaultPred.prediction = e.getPredictedEvents().map(function (e) {
@@ -194,8 +203,9 @@ window.addEventListener("load", function () {
     inking = true
     stroke = []
     addPoint(e.offsetX, e.offsetY, e.timeStamp)
-    stroke[0].defaultPred = { prediction: [] }
-    stroke[0].none = { prediction: [] }
+    predictionTypeArray.forEach(function (type) {
+      stroke[0][type] = { prediction: [] }
+    })
     stopPropagation(e)
   }, false)
   paintCanvas.addEventListener("pointerup", function (e) {
@@ -239,14 +249,15 @@ window.addEventListener("load", function () {
     })
   })
 
-  let predType = document.querySelector("[name='predType']")
-  predType.addEventListener("input", function (e) {
-    predictionType = e.target.value
-    if (analyzing) {
-      displayError()
-    }
+  document.querySelectorAll("[name='predType']").forEach(function (predType) {
+    predType.addEventListener("input", function (e) {
+      predictionType = e.target.value
+      if (analyzing) {
+        displayError()
+      }
+    })
+    predictionType = predType.value
   })
-  predictionType = predType.value
 
   let lineTypeInput = document.querySelector("[name='lineType']")
   lineTypeInput.addEventListener("input", function (e) {
@@ -282,9 +293,9 @@ window.addEventListener("load", function () {
   coalescedEnabled = document.querySelector("[name='coalesce']").value
 
   reader.onload = function (e) {
-    console.log(reader.result)
     recordedFrames = JSON.parse(reader.result)
     recordedFrameIndex = 0
+    addFuturePoints()
     displayError()
   };
 

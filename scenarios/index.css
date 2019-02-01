@@ -1,0 +1,80 @@
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+.table {
+  height: 100%;
+  width: 100%;
+  display: grid;
+  background-color: darkgrey;
+  grid-auto-rows: 1fr;
+  grid-auto-columns: 1fr;
+  grid-gap: 1vh;
+  overflow-x: auto;
+}
+
+.cell {
+  background-color: white;
+  grid-row: span 1;
+  padding: 1vh 1vw;
+  align-items: center;
+  display: grid;
+  text-align: center;
+  position: relative;
+  grid-auto-rows: 1fr;
+  grid-auto-columns: 1fr;
+  font-size: 1vw;
+}
+
+.predCol {
+  background-color: lightyellow;
+  grid-column: 1;
+  font-size: 1.75vw;
+}
+
+.title {
+  background-color: lightsteelblue;
+  font-size: 1.75vw;
+  grid-row: 1;
+}
+
+.defaultPred {
+  grid-row: 2;
+}
+
+.add {
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  background-color: white;
+  padding: 2vh 2vw;
+  transition: 200ms;
+  border: 1px solid black;
+}
+
+.remove {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  background-color: white;
+  padding: 1vh 1vw;
+  transition: 200ms;
+  font-size: initial;
+  border: 1px solid black;
+}
+
+.add:hover, .remove:hover {
+  background-color: lightgreen;
+}
+
+.add:active, .remove:active {
+  background-color: green;
+}
+
+#file {
+  display: none;
+}
