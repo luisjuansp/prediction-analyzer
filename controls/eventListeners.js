@@ -16,13 +16,14 @@ function addPoint(offsetX, offsetY, timeStamp) {
 
 if (!window.getPrediction) {
   window.getPrediction = () => { return { prediction: [] } }
+  recentPointerEvents = []
 }
 
 function addPredictions(point, e) {
   point[predictionType] = {}
   point.defaultPred = {}
   point.none = { prediction: [] }
-  point.recentPointerEvents = window.recentPointerEvents
+  point.recentPointerEvents = recentPointerEvents
 
   let result = getPrediction(predictionType)
   point[predictionType].prediction = result.prediction

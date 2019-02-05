@@ -1,11 +1,3 @@
-// GET THE OFFSET COORDINATES FROM THE X AND Y
-function getOffsetCoordinates(points) {
-  points.forEach(function (e) {
-    e.offsetX = e.x - offsetLeft
-    e.offsetY = e.y - offsetTop
-  })
-}
-
 // DRAWS A LINE FROM (X1,Y1) TO (X2,Y2) WITH A GIVEN COLOR AND WIDTH
 function drawLine(context, x_from, y_from, x_to, y_to, color, width = 1) {
   context.beginPath()
